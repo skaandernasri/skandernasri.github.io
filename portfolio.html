@@ -550,19 +550,17 @@
       position: fixed;
       inset: 0;
       z-index: 500;
-      background: rgba(0,0,0,0.92);
-      backdrop-filter: blur(12px);
+      background: rgba(0,0,0,0.93);
+      backdrop-filter: blur(14px);
       align-items: center;
       justify-content: center;
       padding: 2rem;
     }
 
-    #lightbox.open {
-      display: flex;
-    }
+    #lightbox.open { display: flex; }
 
     .lightbox-inner {
-      max-width: 900px;
+      max-width: 940px;
       width: 100%;
       position: relative;
       animation: lbIn 0.3s ease;
@@ -570,17 +568,121 @@
 
     @keyframes lbIn {
       from { opacity:0; transform: scale(0.95); }
-      to { opacity:1; transform: scale(1); }
+      to   { opacity:1; transform: scale(1); }
     }
 
-    .lightbox-img {
+    /* image stage */
+    .lb-stage {
+      position: relative;
       width: 100%;
+      aspect-ratio: 16/9;
+      background: #0e1520;
       border: 1px solid var(--border);
-      display: block;
+      overflow: hidden;
     }
+
+    .lb-stage img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    .lb-stage img.active { opacity: 1; }
+
+    /* placeholder shown when no images */
+    .lb-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.5rem;
+      background-image:
+        linear-gradient(rgba(0,255,163,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,163,0.04) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    .lb-placeholder-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      color: rgba(0,255,163,0.45);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .lb-placeholder-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* nav arrows */
+    .lb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(8,12,16,0.75);
+      border: 1px solid var(--border);
+      color: #fff;
+      width: 2.6rem; height: 2.6rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      z-index: 10;
+      user-select: none;
+    }
+
+    .lb-arrow:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,255,163,0.08);
+    }
+
+    .lb-arrow.prev { left: 0.75rem; }
+    .lb-arrow.next { right: 0.75rem; }
+    .lb-arrow[hidden] { display: none; }
+
+    /* dots */
+    .lb-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.45rem;
+      margin-top: 0.9rem;
+    }
+
+    .lb-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .lb-dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+    }
+
+    /* footer bar */
+    .lb-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .lb-meta {}
 
     .lightbox-caption {
-      margin-top: 1rem;
       font-family: 'Syne', sans-serif;
       font-size: 1rem;
       font-weight: 700;
@@ -588,11 +690,21 @@
     }
 
     .lightbox-sub {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      margin-top: 0.3rem;
+      margin-top: 0.2rem;
     }
 
+    .lb-counter {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .lb-counter span { color: var(--accent); }
+
+    /* close */
     .lightbox-close {
       position: absolute;
       top: -3rem;
@@ -1055,9 +1167,29 @@
   <div id="lightbox">
     <div class="lightbox-inner">
       <button class="lightbox-close" onclick="closeLightbox()">✕ Close</button>
-      <img id="lightbox-img" class="lightbox-img" src="" alt="Project screenshot" />
-      <div class="lightbox-caption" id="lightbox-caption"></div>
-      <div class="lightbox-sub" id="lightbox-sub"></div>
+
+      <!-- Image stage -->
+      <div class="lb-stage" id="lb-stage">
+        <!-- images injected by JS -->
+        <div class="lb-placeholder" id="lb-placeholder">
+          <div class="lb-placeholder-title">No screenshots yet</div>
+          <div class="lb-placeholder-hint">Add image paths to the <code>projects</code> object in &lt;script&gt;</div>
+        </div>
+        <button class="lb-arrow prev" id="lb-prev" onclick="lbNav(-1)">&#8592;</button>
+        <button class="lb-arrow next" id="lb-next" onclick="lbNav(1)">&#8594;</button>
+      </div>
+
+      <!-- Dots -->
+      <div class="lb-dots" id="lb-dots"></div>
+
+      <!-- Footer -->
+      <div class="lb-footer">
+        <div class="lb-meta">
+          <div class="lightbox-caption" id="lightbox-caption"></div>
+          <div class="lightbox-sub" id="lightbox-sub"></div>
+        </div>
+        <div class="lb-counter" id="lb-counter"></div>
+      </div>
     </div>
   </div>
 
@@ -1116,7 +1248,7 @@
         <span class="contact-link-icon">✉</span>
         <div>
           <div class="contact-link-label">Email</div>
-          <div class="contact-link-value">skan.nasri@gmail.com</div>
+          <div class="contact-link-value"><span class="__cf_email__">skan.nasri@gmail.com</span></div>
         </div>
         <span class="contact-link-arrow">→</span>
       </a>
@@ -1156,7 +1288,7 @@
     <div class="footer-right">© 2026 Skander Nasri — All rights reserved</div>
   </footer>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ─── CUSTOM CURSOR ───
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursorRing');
@@ -1193,76 +1325,112 @@
 
     fadeEls.forEach(el => observer.observe(el));
 
-    // ─── LIGHTBOX ───
-    // Map of project IDs to screenshot info
-    // To add your real screenshots, replace the `img` field with the actual image URL or file path
+    // ─── LIGHTBOX (multi-image) ───
+    // Add your screenshot paths as arrays under `images`.
+    // Leave images: [] to show the placeholder.
     const projects = {
       ecommerce: {
-        // img: 'screenshots/ecommerce.png',  // ← your real screenshot path
-        img: null,
         caption: 'E-commerce Platform',
-        sub: 'Spring Boot · Angular · Docker · Jenkins · ML Recommendations'
+        sub: 'Spring Boot · Angular · Docker · Jenkins · ML Recommendations',
+        images: [
+        'screenshots/ecommerce/Capture d’écran 2026-03-30 085158.png',
+        'screenshots/ecommerce/Capture d’écran 2026-03-30 085348.png',
+        'screenshots/ecommerce/Capture d’écran 2026-03-30 085448.png',
+        'screenshots/ecommerce/Capture d’écran 2026-03-30 085426.png'
+          // 'screenshots/ecommerce-1.png',
+          // 'screenshots/ecommerce-2.png',
+          // 'screenshots/ecommerce-3.png',
+        ]
       },
       devops: {
-        // img: 'screenshots/devops.png',
-        img: null,
         caption: 'DevOps Pipeline',
-        sub: 'Jenkins · Docker · Prometheus · SonarQube · Nexus'
+        sub: 'Jenkins · Docker · Prometheus · SonarQube · Nexus',
+        images: [
+          // 'screenshots/devops-1.png',
+          // 'screenshots/devops-2.png',
+        ]
       },
       docmgmt: {
-        // img: 'screenshots/docmgmt.png',
-        img: null,
         caption: 'Document Management Platform',
-        sub: 'Spring Boot · Angular · PostgreSQL · RBAC'
+        sub: 'Spring Boot · Angular · PostgreSQL · RBAC',
+        images: [
+          // 'screenshots/docmgmt-1.png',
+          // 'screenshots/docmgmt-2.png',
+        ]
       }
     };
 
+    let lbCurrent = 0;
+    let lbImages  = [];
+
     function openLightbox(id) {
       const p = projects[id];
-      const lb = document.getElementById('lightbox');
-      const lbImg = document.getElementById('lightbox-img');
-      const lbCap = document.getElementById('lightbox-caption');
-      const lbSub = document.getElementById('lightbox-sub');
-
-      lbCap.textContent = p.caption;
-      lbSub.textContent = p.sub;
-
-      if (p.img) {
-        lbImg.src = p.img;
-        lbImg.style.display = 'block';
-      } else {
-        lbImg.style.display = 'none';
-        // Show a placeholder with project name
-        let placeholder = document.getElementById('lb-placeholder');
-        if (!placeholder) {
-          placeholder = document.createElement('div');
-          placeholder.id = 'lb-placeholder';
-          placeholder.style.cssText = `
-            width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0e1520,#1a2540);
-            display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,255,163,0.12);
-            position:relative;overflow:hidden;
-          `;
-          placeholder.innerHTML = `
-            <div style="text-align:center;z-index:1;">
-              <div style="font-family:'Syne',sans-serif;font-size:1rem;color:rgba(0,255,163,0.5);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.5rem;">Add Screenshot</div>
-              <div style="font-size:0.75rem;color:#6b7fa3;">Set the img path in the projects object in &lt;script&gt;</div>
-            </div>
-            <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,163,0.04)1px,transparent 1px),linear-gradient(90deg,rgba(0,255,163,0.04)1px,transparent 1px);background-size:30px 30px;"></div>
-          `;
-          document.querySelector('.lightbox-inner').insertBefore(placeholder, lbImg.nextSibling);
-        }
-        placeholder.style.display = 'flex';
-      }
-
-      lb.classList.add('open');
+      lbImages  = p.images || [];
+      lbCurrent = 0;
+      document.getElementById('lightbox-caption').textContent = p.caption;
+      document.getElementById('lightbox-sub').textContent     = p.sub;
+      buildStage();
+      document.getElementById('lightbox').classList.add('open');
       document.body.style.overflow = 'hidden';
+    }
+
+    function buildStage() {
+      const stage = document.getElementById('lb-stage');
+      const placeholder = document.getElementById('lb-placeholder');
+      const dotsEl  = document.getElementById('lb-dots');
+      const counter = document.getElementById('lb-counter');
+      const prevBtn = document.getElementById('lb-prev');
+      const nextBtn = document.getElementById('lb-next');
+
+      stage.querySelectorAll('img').forEach(el => el.remove());
+      dotsEl.innerHTML = '';
+
+      const hasImages = lbImages.length > 0;
+      placeholder.style.display = hasImages ? 'none' : 'flex';
+      prevBtn.hidden = !hasImages || lbImages.length === 1;
+      nextBtn.hidden = !hasImages || lbImages.length === 1;
+
+      if (!hasImages) { counter.innerHTML = ''; return; }
+
+      lbImages.forEach((src, i) => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Screenshot ${i + 1}`;
+        if (i === 0) img.classList.add('active');
+        stage.insertBefore(img, prevBtn);
+      });
+
+      lbImages.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'lb-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goTo(i);
+        dotsEl.appendChild(dot);
+      });
+
+      updateUI();
+    }
+
+    function goTo(index) {
+      const imgs = document.getElementById('lb-stage').querySelectorAll('img');
+      const dots = document.getElementById('lb-dots').querySelectorAll('.lb-dot');
+      imgs[lbCurrent].classList.remove('active');
+      dots[lbCurrent]?.classList.remove('active');
+      lbCurrent = (index + lbImages.length) % lbImages.length;
+      imgs[lbCurrent].classList.add('active');
+      dots[lbCurrent]?.classList.add('active');
+      updateUI();
+    }
+
+    function lbNav(dir) { goTo(lbCurrent + dir); }
+
+    function updateUI() {
+      document.getElementById('lb-counter').innerHTML =
+        `<span>${lbCurrent + 1}</span> / ${lbImages.length}`;
     }
 
     function closeLightbox() {
       document.getElementById('lightbox').classList.remove('open');
       document.body.style.overflow = '';
-      const placeholder = document.getElementById('lb-placeholder');
-      if (placeholder) placeholder.style.display = 'none';
     }
 
     // Close on backdrop click
@@ -1270,9 +1438,12 @@
       if (e.target === this) closeLightbox();
     });
 
-    // Close on Escape
+    // Keyboard: Escape, ArrowLeft, ArrowRight
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeLightbox();
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape')      closeLightbox();
+      if (e.key === 'ArrowLeft')   lbNav(-1);
+      if (e.key === 'ArrowRight')  lbNav(1);
     });
   </script>
 </body>
