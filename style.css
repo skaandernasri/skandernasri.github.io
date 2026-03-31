@@ -5,6 +5,7 @@
       --surface: #0e1520;
       --border: rgba(0,255,163,0.12);
       --text-muted: #6b7fa3;
+      --text: #5b6b82;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -836,7 +837,7 @@
       font-family: 'Syne', sans-serif;
       font-size: 0.95rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text);
     }
 
     .contact-link-arrow {

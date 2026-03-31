@@ -6,6 +6,7 @@
   <title>Skander Nasri — Portfolio</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,8 +24,14 @@
       <a href="#projects">Projects</a>
       <a href="#experience">Experience</a>
       <a href="#contact">Contact</a>
+      <select id="themeSwitcher">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
     </div>
   </nav>
+  <!-- Switch theme list (dark / light) -->
+
 
   <!-- HERO -->
   <section class="hero">
@@ -393,7 +400,57 @@ access.
     <div class="footer-right">© 2026 Skander Nasri — All rights reserved</div>
   </footer>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
+    // --- themes ---
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const theme = localStorage.getItem('theme');
+    if(theme === 'dark' || theme == null) {
+      themeSwitcher.value = 'dark';
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.style.setProperty('--bg', '#080c10');
+      document.documentElement.style.setProperty('--accent', '#00ffa3');
+      document.documentElement.style.setProperty('--accent2', '#0ef');
+      document.documentElement.style.setProperty('--surface', '#0e1520');
+      document.documentElement.style.setProperty('--border', 'rgba(0,255,163,0.12)');
+      document.documentElement.style.setProperty('--text-muted', '#6b7fa3');
+      document.documentElement.style.setProperty('--text', '#5b6b82');
+
+    }
+    else{
+      themeSwitcher.value = 'light';
+      localStorage.setItem('theme', 'light');
+document.documentElement.style.setProperty('--bg', '#f8fafc');        // light background
+document.documentElement.style.setProperty('--accent', '#00c48c');   // slightly softer green
+document.documentElement.style.setProperty('--accent2', '#0099cc');  // softer cyan
+document.documentElement.style.setProperty('--surface', '#ffffff');  // cards / sections
+document.documentElement.style.setProperty('--border', 'rgba(0,0,0,0.08)');
+document.documentElement.style.setProperty('--text-muted', '#5b6b82');
+document.documentElement.style.setProperty('--text', '#080c10');
+    }
+
+    themeSwitcher.addEventListener('change', () => {
+      console.log("theme switcher value",themeSwitcher.value);
+      
+      if(themeSwitcher.value === 'dark') {
+        document.documentElement.style.setProperty('--bg', '#080c10');
+        document.documentElement.style.setProperty('--accent', '#00ffa3');
+        document.documentElement.style.setProperty('--accent2', '#0ef');
+        document.documentElement.style.setProperty('--surface', '#0e1520');
+        document.documentElement.style.setProperty('--border', 'rgba(0,255,163,0.12)');
+        document.documentElement.style.setProperty('--text-muted', '#6b7fa3');
+        document.documentElement.style.setProperty('--text', '#5b6b82');
+        localStorage.setItem('theme', 'dark');
+      } else {
+document.documentElement.style.setProperty('--bg', '#f8fafc');        // light background
+document.documentElement.style.setProperty('--accent', '#00c48c');   // slightly softer green
+document.documentElement.style.setProperty('--accent2', '#0099cc');  // softer cyan
+document.documentElement.style.setProperty('--surface', '#ffffff');  // cards / sections
+document.documentElement.style.setProperty('--border', 'rgba(0,0,0,0.08)');
+document.documentElement.style.setProperty('--text-muted', '#5b6b82');
+document.documentElement.style.setProperty('--text', '#080c10');  
+localStorage.setItem('theme', 'light');
+      }
+    })
     // ─── CUSTOM CURSOR ───
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursorRing');
