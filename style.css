@@ -65,6 +65,12 @@
       margin-left: 2rem;
       transition: color 0.2s;
     }
+    .nav-links #themeSwitcher {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 2rem;
+      transition: color 0.2s;
+    }
 
     .nav-links a:hover { color: var(--accent); }
 
